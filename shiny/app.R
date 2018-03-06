@@ -1,4 +1,5 @@
 library(shiny)
+library(tidyverse)
 library(BerginskiRMisc)
 
 scan_data = read.csv('data/LINCS_KINOMEscan_percent.csv')
@@ -47,9 +48,8 @@ server <- function(input, output) {
       geom_bar(stat='identity') + 
       labs(x="Small Molecule Name",y="Percent Control") + 
       theme(text = element_text(size=20),
-        axis.text.x = element_text(angle = 90, hjust = 1,size=20*dim(this_protein)[1]/256)) +
-      theme_berginski() +
-      ggtitle(dim(this_protein))
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5 ,size=10)) +
+      theme_berginski()
   })
 
   output$protein_table <- renderDataTable(selected_protein(),
