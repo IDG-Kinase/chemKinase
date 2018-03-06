@@ -42,7 +42,6 @@ server <- function(input,output,session) {
   
   selected_protein_name <- reactive({
     req(input$protein_name)
-    input$protein_name
   })
   
   output$protein_plot <- renderPlot({
@@ -62,7 +61,9 @@ server <- function(input,output,session) {
                                           options=list(pageLength=10))
   
   output$protein_download <- downloadHandler(
-    filename = paste0(selected_protein_name(),'_percent.csv'),
+    filename = function () {
+      paste0(selected_protein_name(),'_percent.csv')
+    },
     content = function(file) {
       write.csv(selected_protein(),file,row.names = F)
     })
@@ -95,7 +96,9 @@ server <- function(input,output,session) {
                                           options=list(pageLength=10))
   
   output$compound_download <- downloadHandler(
-    filename = paste0(selected_compound_name(),'.csv'),
+    filename = function() {
+      paste0(selected_compound_name(),'.csv')
+    },
     content = function(file) {
       write.csv(selected_compound(),file,row.names = F)
     })
