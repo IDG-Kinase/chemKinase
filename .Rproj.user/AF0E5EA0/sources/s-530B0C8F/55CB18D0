@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1520006805292.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "55CB18D0",
+    "lastKnownWriteTime" : 1520013379,
+    "last_content_update" : 1520013379371,
+    "path" : "~/Documents/Projects/chemKinase/load_LINCS_data.R",
+    "project_path" : "load_LINCS_data.R",
+    "properties" : {
+        "cursorPosition" : "6,20",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,3 @@
+library(tidyverse)
+
+KINOME_percent = read.csv('LINCS_KINOMEscan_percent.csv');
