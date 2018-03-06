@@ -5,6 +5,7 @@ library(BerginskiRMisc)
 scan_data = read.csv('data/LINCS_KINOMEscan_percent.csv')
 
 ui <- fluidPage(
+  titlePanel('KINOMEscan Data Visualization',"KINOMEscan"),
   tabsetPanel(
     tabPanel("Protein",fluidRow(
       column(width=2,selectInput("protein_name","Protein Name",sort(unique(scan_data$Protein.Name)),'YES')),
@@ -18,13 +19,18 @@ ui <- fluidPage(
     tabPanel("Compound",fluidRow(
       column(width=2,selectInput("compound_name","Compound Name",unique(scan_data$Small.Molecule.Name))),
       column(width=10,plotOutput('compound_plot',height = 800))
-    )
+    ),
+    hr(),
+    fluidRow(column(width=12,  
+                    dataTableOutput('compound_table'),
+                    downloadButton('compound_download')
+    ))
     
     )    
   ) 
 )
 
-server <- function(input, output) {
+server <- function(input,output,session) {
   
   #############################################################################
   #Protein Functions
@@ -42,9 +48,9 @@ server <- function(input, output) {
   output$protein_plot <- renderPlot({
     this_protein = selected_protein() %>%
       mutate(name_concen = paste0(Small.Molecule.Name,' ',Assay.compound.conc, Conc.unit)) %>%
-      arrange(desc(X..Control))
+      arrange(desc(Percent.Control))
     
-    ggplot(this_protein,aes(y=X..Control,x=reorder(name_concen,X..Control))) + 
+    ggplot(this_protein,aes(y=Percent.Control,x=reorder(name_concen,Percent.Control))) + 
       geom_bar(stat='identity') + 
       labs(x="Small Molecule Name",y="Percent Control") + 
       theme(text = element_text(size=20),
@@ -56,7 +62,7 @@ server <- function(input, output) {
                                           options=list(pageLength=10))
   
   output$protein_download <- downloadHandler(
-    filename = paste0(selected_protein_name(),'_Kd.csv'),
+    filename = paste0(selected_protein_name(),'_percent.csv'),
     content = function(file) {
       write.csv(selected_protein(),file,row.names = F)
     })
@@ -68,25 +74,32 @@ server <- function(input, output) {
     compound_data <- scan_data %>% filter(Small.Molecule.Name == input$compound_name)
   })
   
-  selected_compound <- reactive({
+  selected_compound_name <- reactive({
     req(input$compound_name)
-    compound_data <- scan_data %>% filter(Small.Molecule.Name == input$compound_name)
+    input$compound_name
   })
   
   output$compound_plot <- renderPlot({
     this_compound = selected_compound() %>%
-      mutate(name_concen = paste0(Small.Molecule.Name,' ',Assay.compound.conc, Conc.unit)) %>%
-      arrange(desc(X..Control))
+      mutate(name_concen = paste0(Protein.Name,' ',Assay.compound.conc, Conc.unit))
     
-    ggplot(this_protein,aes(y=X..Control,x=reorder(name_concen,X..Control))) + 
+    ggplot(this_compound,aes(y=Percent.Control,x=reorder(name_concen,Percent.Control))) + 
       geom_bar(stat='identity') + 
-      labs(x="Small Molecule Name",y="Percent Control") + 
+      labs(x="Protein Name",y="Percent Control") + 
       theme(text = element_text(size=20),
-            axis.text.x = element_text(angle = 90, hjust = 1,size=20)) +
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5 ,size=10)) +
       theme_berginski()
   })
   
+  output$compound_table <- renderDataTable(selected_compound(),
+                                          options=list(pageLength=10))
   
+  output$compound_download <- downloadHandler(
+    filename = paste0(selected_compound_name(),'.csv'),
+    content = function(file) {
+      write.csv(selected_compound(),file,row.names = F)
+    })
+
 }
 
 shinyApp(ui = ui, server = server)
