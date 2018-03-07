@@ -30,7 +30,7 @@ ui <- fluidPage(
     ))),
     tabPanel("Compound",fluidRow(
       column(width=2,
-             selectInput("compound_name","Compound Name",unique(scan_data$Small.Molecule.Name)),
+             selectInput("compound_name","Compound Name",sort(unique(scan_data$Small.Molecule.Name))),
              sliderInput("percent_control_compound",
                          "Percent Control Range",
                          0,100,value=c(0,100)),
@@ -106,7 +106,6 @@ server <- function(input,output,session) {
              Percent.Control >= input$percent_control_compound[1],
              Percent.Control <= input$percent_control_compound[2],
              concen_units %in% input$compound_concen_compound)
-    print(dim(compound_data))
     compound_data
   })
   
