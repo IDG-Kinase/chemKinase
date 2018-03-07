@@ -1,4 +1,4 @@
-"Small.Molecule.HMS.LINCS.ID","Small.Molecule.Name","Protein.HMS.LINCS.ID","Protein.Name","X..Control","Assay.compound.conc","Conc.unit"
+"Small.Molecule.HMS.LINCS.ID","Small.Molecule.Name","Protein.HMS.LINCS.ID","Protein.Name","Percent.Control","Assay.compound.conc","Conc.unit"
 "10008-101-1","Sorafenib",200001,"AAK1",100,10,"uM"
 "10008-101-1","Sorafenib",200004,"ABL1(E255K)-phosphorylated",47,10,"uM"
 "10008-101-1","Sorafenib",200006,"ABL1(F317I)-nonphosphorylated",5.6,10,"uM"
