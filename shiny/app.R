@@ -4,11 +4,23 @@ library(BerginskiRMisc)
 
 scan_data = read.csv('data/LINCS_KINOMEscan_percent.csv')
 
+scan_data_derived = scan_data %>%
+  mutate(name_concen = paste0(Small.Molecule.Name,' ',Assay.compound.conc, Conc.unit),
+         concen_units = paste0(Assay.compound.conc, Conc.unit))
+
 ui <- fluidPage(
   titlePanel('KINOMEscan Data Visualization',"KINOMEscan"),
   tabsetPanel(
     tabPanel("Protein",fluidRow(
-      column(width=2,selectInput("protein_name","Protein Name",sort(unique(scan_data$Protein.Name)),'YES')),
+      column(width=2,
+             selectInput("protein_name","Protein Name",sort(unique(scan_data$Protein.Name)),'YES'),
+             sliderInput("percent_control_protein",
+                         "Percent Control Range",
+                         0,100,value=c(0,100)),
+             checkboxGroupInput("compound_concen_protein",
+                                "Compound Concentration",
+                                unique(scan_data_derived$concen_units),
+                                unique(scan_data_derived$concen_units))),
       column(width=10,plotOutput('protein_plot',height = 800))
     ),
     hr(),
@@ -17,7 +29,16 @@ ui <- fluidPage(
                     downloadButton('protein_download')
     ))),
     tabPanel("Compound",fluidRow(
-      column(width=2,selectInput("compound_name","Compound Name",unique(scan_data$Small.Molecule.Name))),
+      column(width=2,
+             selectInput("compound_name","Compound Name",unique(scan_data$Small.Molecule.Name)),
+             sliderInput("percent_control_compound",
+                         "Percent Control Range",
+                         0,100,value=c(0,100)),
+             checkboxGroupInput("compound_concen_compound",
+                                "Compound Concentration",
+                                unique(scan_data_derived$concen_units),
+                                unique(scan_data_derived$concen_units))),
+          
       column(width=10,plotOutput('compound_plot',height = 800))
     ),
     hr(),
@@ -37,7 +58,12 @@ server <- function(input,output,session) {
   #############################################################################
   selected_protein <- reactive({
     req(input$protein_name)
-    protein_data <- scan_data %>% filter(Protein.Name == input$protein_name)
+    protein_data <- scan_data %>% 
+      mutate(concen_units = paste0(Assay.compound.conc, Conc.unit)) %>%
+      filter(Protein.Name == input$protein_name, 
+             Percent.Control >= input$percent_control_protein[1],
+             Percent.Control <= input$percent_control_protein[2],
+             concen_units %in% input$compound_concen_protein)
   })
   
   selected_protein_name <- reactive({
@@ -68,11 +94,20 @@ server <- function(input,output,session) {
       write.csv(selected_protein(),file,row.names = F)
     })
   
-    
+  #############################################################################
   #Compound Functions
+  #############################################################################
   selected_compound <- reactive({
     req(input$compound_name)
-    compound_data <- scan_data %>% filter(Small.Molecule.Name == input$compound_name)
+    compound_data <- scan_data %>% 
+      filter(Small.Molecule.Name == input$compound_name) %>%
+      mutate(concen_units = paste0(Assay.compound.conc, Conc.unit)) %>%
+      filter(Small.Molecule.Name == input$compound_name,
+             Percent.Control >= input$percent_control_compound[1],
+             Percent.Control <= input$percent_control_compound[2],
+             concen_units %in% input$compound_concen_compound)
+    print(dim(compound_data))
+    compound_data
   })
   
   selected_compound_name <- reactive({
