@@ -8,6 +8,10 @@ scan_data_derived = scan_data %>%
   mutate(name_concen = paste0(Small.Molecule.Name,' ',Assay.compound.conc, Conc.unit),
          concen_units = paste0(Assay.compound.conc, Conc.unit))
 
+dark_kinase_list = read.csv('data/Dark Kinase List.csv')
+
+dark_kinase_overlap = intersect(dark_kinase_list$Kinase,unique(scan_data$Protein.Name))
+
 ui <- fluidPage(
   titlePanel('KINOMEscan Data Visualization',"KINOMEscan"),
   tabsetPanel(
@@ -20,7 +24,10 @@ ui <- fluidPage(
              checkboxGroupInput("compound_concen_protein",
                                 "Compound Concentration",
                                 unique(scan_data_derived$concen_units),
-                                unique(scan_data_derived$concen_units))),
+                                unique(scan_data_derived$concen_units)),
+             h4("Filtering Options"),
+             checkboxInput("only_dark_kinases_protein",
+                                "Only Show Dark Kinases")),
       column(width=10,plotOutput('protein_plot',height = 800))
     ),
     hr(),
@@ -37,8 +44,10 @@ ui <- fluidPage(
              checkboxGroupInput("compound_concen_compound",
                                 "Compound Concentration",
                                 unique(scan_data_derived$concen_units),
-                                unique(scan_data_derived$concen_units))),
-          
+                                unique(scan_data_derived$concen_units)),
+             h4("Filtering Options"),
+             checkboxInput("only_dark_kinases_compound",
+                           "Only Show Dark Kinases")),
       column(width=10,plotOutput('compound_plot',height = 800))
     ),
     hr(),
@@ -64,6 +73,24 @@ server <- function(input,output,session) {
              Percent.Control >= input$percent_control_protein[1],
              Percent.Control <= input$percent_control_protein[2],
              concen_units %in% input$compound_concen_protein)
+  })
+  
+  observe({
+    # Can also set the label and select items
+    if (input$only_dark_kinases_protein) {
+      updateSelectInput(session, "protein_name",
+                        label = "Protein Name",
+                        choices = dark_kinase_overlap,
+                        selected = dark_kinase_overlap[1]
+      )
+    } else {
+      updateSelectInput(session, "protein_name",
+                        label = "Protein Name",
+                        choices = sort(unique(scan_data$Protein.Name)),
+                        selected = "YES"
+      )
+      
+    }
   })
   
   selected_protein_name <- reactive({
@@ -106,6 +133,12 @@ server <- function(input,output,session) {
              Percent.Control >= input$percent_control_compound[1],
              Percent.Control <= input$percent_control_compound[2],
              concen_units %in% input$compound_concen_compound)
+    
+    if (input$only_dark_kinases_compound) {
+      compound_data <- compound_data %>%
+        filter(Protein.Name %in% dark_kinase_overlap)
+    }
+    
     compound_data
   })
   
