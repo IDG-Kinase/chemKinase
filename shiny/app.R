@@ -1,8 +1,9 @@
 library(shiny)
 library(tidyverse)
 library(BerginskiRMisc)
+library(here)
 
-scan_data = read.csv('data/LINCS_KINOMEscan_percent.csv')
+scan_data = readRDS('data/Full_KINOMEscan_percent.rds')
 
 scan_data_derived = scan_data %>%
   mutate(name_concen = paste0(Small.Molecule.Name,' ',Assay.compound.conc, Conc.unit),
@@ -72,7 +73,8 @@ server <- function(input,output,session) {
       filter(Protein.Name == input$protein_name, 
              Percent.Control >= input$percent_control_protein[1],
              Percent.Control <= input$percent_control_protein[2],
-             concen_units %in% input$compound_concen_protein)
+             concen_units %in% input$compound_concen_protein) %>%
+      select(-concen_units)
   })
   
   observe({
@@ -80,7 +82,7 @@ server <- function(input,output,session) {
     if (input$only_dark_kinases_protein) {
       updateSelectInput(session, "protein_name",
                         label = "Protein Name",
-                        choices = dark_kinase_overlap,
+                        choices = sort(dark_kinase_overlap),
                         selected = dark_kinase_overlap[1]
       )
     } else {
@@ -132,7 +134,8 @@ server <- function(input,output,session) {
       filter(Small.Molecule.Name == input$compound_name,
              Percent.Control >= input$percent_control_compound[1],
              Percent.Control <= input$percent_control_compound[2],
-             concen_units %in% input$compound_concen_compound)
+             concen_units %in% input$compound_concen_compound) %>%
+      select(-concen_units)
     
     if (input$only_dark_kinases_compound) {
       compound_data <- compound_data %>%
