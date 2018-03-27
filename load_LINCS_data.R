@@ -28,7 +28,8 @@ UNC_KINOMEscan_percent = UNC_KINOMEscan_percent %>%
   select(-one_of('Chemotype','Smiles','>90','>80','>70','Regno')) %>%
   gather(Protein.Name,Percent.Control,-Compound) %>%
   rename(Small.Molecule.Name = Compound) %>%
-  mutate(Assay.compound.conc = 1, Conc.unit = 'uM')
+  mutate(Assay.compound.conc = 1, Conc.unit = 'uM') %>%
+  filter(!is.na(Small.Molecule.Name))
 
 write.csv(LINCS_KINOMEscan_percent,here('UNC_KINOMEscan_percent.csv'), row.names = F)
 saveRDS(LINCS_KINOMEscan_percent,here('UNC_KINOMEscan_percent.rds'))
