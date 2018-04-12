@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(BerginskiRMisc)
+library(DarkKinaseTools)
 library(here)
 
 scan_data = readRDS('data/Full_KINOMEscan_percent.rds')
@@ -9,9 +10,7 @@ scan_data_derived = scan_data %>%
   mutate(name_concen = paste0(Small.Molecule.Name,' ',Assay.compound.conc, Conc.unit),
          concen_units = paste0(Assay.compound.conc, Conc.unit))
 
-dark_kinase_list = read.csv('data/Dark Kinase List.csv')
-
-dark_kinase_overlap = intersect(dark_kinase_list$Kinase,unique(scan_data$Protein.Name))
+dark_kinase_overlap = intersect(DarkKinaseTools::dark_kinases$hgnc_symbol,unique(scan_data$Protein.Name))
 
 ui <- fluidPage(
   titlePanel('KINOMEscan Data Visualization',"KINOMEscan"),
