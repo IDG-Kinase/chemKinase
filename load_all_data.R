@@ -29,6 +29,9 @@ UNC_KINOMEscan_percent = UNC_KINOMEscan_percent %>%
   gather(Protein.Name,Percent.Control,-Compound) %>%
   rename(Small.Molecule.Name = Compound) %>%
   mutate(Assay.compound.conc = 1, Conc.unit = 'uM') %>%
+  #These results are presented as percent inhibition, to make it line up with
+  #the rest of the data, convert to Percent.Control
+  mutate(Percent.Control = 100-Percent.Control) %>%
   filter(!is.na(Small.Molecule.Name))
 
 UNC_KINOMEscan_percent_2 = read_csv(here('UNC/SGC024-01-p-00003_Data Report.csv')) %>%
@@ -40,8 +43,6 @@ UNC_KINOMEscan_percent_2 = read_csv(here('UNC/SGC024-01-p-00003_Data Report.csv'
   mutate(Conc.unit = "nM")
 
 # write.csv(LINCS_KINOMEscan_percent,here('UNC_KINOMEscan_percent.csv'), row.names = F)
-
-
 
 # saveRDS(LINCS_KINOMEscan_percent,here('UNC_KINOMEscan_percent.rds'))
 
